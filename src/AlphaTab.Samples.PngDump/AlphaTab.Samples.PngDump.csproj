@@ -4,6 +4,6 @@
         <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="AlphaTab" Version="*-*"/>
+        <PackageReference Include="AlphaTab" Version="-*"/>
     </ItemGroup>
 </Project>
