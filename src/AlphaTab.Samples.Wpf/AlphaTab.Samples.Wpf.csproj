@@ -23,6 +23,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AlphaTab.Windows" Version="*-*" />
+        <PackageReference Include="AlphaTab.Windows" Version="-*" />
     </ItemGroup>
 </Project>
