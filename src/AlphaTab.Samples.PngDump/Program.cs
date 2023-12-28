@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using AlphaSkia;
 using AlphaTab.Importer;
 using AlphaTab.Rendering;
-using SkiaSharp;
 
 namespace AlphaTab.Samples.PngDump;
 
@@ -40,10 +40,10 @@ public static class Program
 
             // render track
             Console.WriteLine("Rendering track {0} - {1}", i + 1, track.Name);
-            var images = new List<SKImage>();
+            var images = new List<RenderFinishedEventArgs>();
             var totalWidth = 0;
             var totalHeight = 0;
-            renderer.PartialRenderFinished.On(r => { images.Add((SKImage)r.RenderResult); });
+            renderer.PartialRenderFinished.On(r => { images.Add(r); });
             renderer.RenderFinished.On(r =>
             {
                 totalWidth = (int)r.TotalWidth;
@@ -56,23 +56,23 @@ public static class Program
             var path = Path.Combine(info.DirectoryName,
                 Path.GetFileNameWithoutExtension(info.Name) + "-" + i + ".png");
 
-            using var full = SKSurface.Create(new SKImageInfo(totalWidth, totalHeight,
-                SKImageInfo.PlatformColorType, SKAlphaType.Premul));
-
-            var y = 0;
+            using var full = new AlphaSkiaCanvas();
+            full.BeginRender(totalWidth, totalHeight);
+            
             foreach (var image in images)
             {
-                full.Canvas.DrawImage(image, new SKRect(0, 0, image.Width, image.Height),
-                    new SKRect(0, y, image.Width, y + image.Height));
-                y += image.Height;
+                full.DrawImage(((AlphaTab.Platform.Skia.AlphaSkiaBridge.AlphaSkiaImage)image.RenderResult!).Image, 
+                    (float)image.X,
+                    (float)image.Y,
+                    (float)image.Width,
+                    (float)image.Height);
             }
 
-            using var fullImage = full.Snapshot();
-            using var data = fullImage.Encode(SKEncodedImageFormat.Png, 100)
-                .AsStream(true);
+            using var fullImage = full.EndRender()!;
+            var data = fullImage.ToPng()!;
             using var fileStream =
                 new FileStream(path, FileMode.Create, FileAccess.Write);
-            data.CopyTo(fileStream);
+            fileStream.Write(data);
         }
     }
 }

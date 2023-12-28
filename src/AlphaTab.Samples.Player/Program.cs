@@ -21,11 +21,12 @@ public static class Program
 
         // generate midi
         var midiFile = new MidiFile();
+        var settings = new Settings();
         var handler = new AlphaSynthMidiFileHandler(midiFile);
-        var generator = new MidiFileGenerator(score, null, handler);
+        var generator = new MidiFileGenerator(score, settings, handler);
         generator.Generate();
 
-        var player = new AlphaSynth(new NAudioSynthOutput());
+        var player = new AlphaSynth(new NAudioSynthOutput(), settings.Player.BufferTimeInMilliseconds);
         player.MidiLoaded.On(() => { Console.WriteLine("Midi loaded"); });
         player.SoundFontLoaded.On(() => { Console.WriteLine("SoundFont loaded"); });
         player.MidiLoadFailed.On(_ => { Console.WriteLine("Midi load failed"); });
